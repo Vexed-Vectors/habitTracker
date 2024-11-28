@@ -196,3 +196,83 @@ class Habit(models.Model):
         indexes = [
             models.Index(fields=['user', 'frequency', 'start_date']),
         ]
+
+class HabitCompletion(models.Model):
+    """
+    Model representing a habit completion entry
+    
+    Attributes:
+    - id: Unique identifier for the habit completion (UUID primary key)
+    - habit: Foreign key relationship to the Habit model
+    - date: Date of habit completion
+    - status: Boolean indicating whether the habit was completed
+    """
+    
+    id = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False
+    )
+    
+    habit = models.ForeignKey(
+        Habit, 
+        on_delete=models.CASCADE, 
+        related_name='completions'
+    )
+    
+    date = models.DateField()
+    
+    status = models.BooleanField(
+        default=False, 
+        help_text="Indicates whether the habit was completed on this date"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def clean(self):
+        """
+        Custom validation to ensure:
+        1. Date is within habit's start and end dates
+        2. No duplicate entries for the same habit and date
+        """
+        # Check if date is within habit's tracking period
+        if self.habit.start_date and self.date < self.habit.start_date:
+            raise ValidationError("Completion date cannot be before habit start date")
+        
+        if self.habit.end_date and self.date > self.habit.end_date:
+            raise ValidationError("Completion date cannot be after habit end date")
+        
+        # Check for duplicate entries
+        existing_completion = HabitCompletion.objects.filter(
+            habit=self.habit, 
+            date=self.date
+        ).exclude(pk=self.pk).exists()
+        
+        if existing_completion:
+            raise ValidationError("A completion entry for this habit on this date already exists")
+    
+    def save(self, *args, **kwargs):
+        """
+        Override save method to run full clean validation
+        """
+        self.full_clean()
+        return super().save(*args, **kwargs)
+    
+    def __str__(self):
+        """
+        String representation of the HabitCompletion
+        """
+        return f"{self.habit.name} - {self.date} ({'Completed' if self.status else 'Not Completed'})"
+    
+    class Meta:
+        """
+        Metadata for the HabitCompletion model
+        """
+        unique_together = [['habit', 'date']]  # Ensure unique habit-date combination
+        ordering = ['-date']
+        verbose_name_plural = 'Habit Completions'
+        indexes = [
+            models.Index(fields=['habit', 'date', 'status']),
+        ]
+

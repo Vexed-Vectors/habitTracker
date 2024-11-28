@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import CustomUser
+from .models import CustomUser, Habit, HabitCompletion
 
 class CustomUserAdmin(UserAdmin):
     """
@@ -58,3 +58,111 @@ class CustomUserAdmin(UserAdmin):
 
 # Register the CustomUser model with the custom admin configuration
 admin.site.register(CustomUser, CustomUserAdmin)
+
+@admin.register(Habit)
+class HabitAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the Habit model
+    """
+    list_display = (
+        'name', 
+        'user', 
+        'frequency', 
+        'start_date', 
+        'end_date', 
+        'created_at'
+    )
+    
+    list_filter = (
+        'frequency', 
+        'start_date', 
+        'end_date',
+        'user'
+    )
+    
+    search_fields = (
+        'name', 
+        'description', 
+        'user__email'
+    )
+    
+    readonly_fields = (
+        'id', 
+        'created_at', 
+        'updated_at'
+    )
+    
+    fieldsets = (
+        (None, {
+            'fields': (
+                'id', 
+                'user', 
+                'name', 
+                'description'
+            )
+        }),
+        ('Habit Details', {
+            'fields': (
+                'frequency', 
+                'start_date', 
+                'end_date'
+            )
+        }),
+        ('Timestamps', {
+            'fields': (
+                'created_at', 
+                'updated_at'
+            )
+        })
+    )
+    
+    ordering = ('-created_at',)
+
+@admin.register(HabitCompletion)
+class HabitCompletionAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for the HabitCompletion model
+    """
+    list_display = (
+        'habit', 
+        'date', 
+        'status', 
+        'created_at'
+    )
+    
+    list_filter = (
+        'status', 
+        'date', 
+        'habit__name',
+        'habit__user'
+    )
+    
+    search_fields = (
+        'habit__name', 
+        'habit__user__email'
+    )
+    
+    readonly_fields = (
+        'id', 
+        'created_at', 
+        'updated_at'
+    )
+    
+    fieldsets = (
+        (None, {
+            'fields': (
+                'id', 
+                'habit', 
+                'date', 
+                'status'
+            )
+        }),
+        ('Timestamps', {
+            'fields': (
+                'created_at', 
+                'updated_at'
+            )
+        })
+    )
+    
+    ordering = ('-date',)
