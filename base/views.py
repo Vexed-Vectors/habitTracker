@@ -10,6 +10,20 @@ from django.core.validators import validate_email
 import json
 
 from base.models import CustomUser
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def custom_admin_login(request):
+    if not request.user.is_staff:
+        messages.error(request, "You do not have permission to access the admin panel.")
+        return redirect('home')  # Redirect to home or login page
+    
+    # If using default admin login
+    from django.contrib.admin.views.decorators import login_required as admin_login_required
+    return admin_login_required(request)
+
+
 
 @require_http_methods(["GET"])
 def login_page(request):

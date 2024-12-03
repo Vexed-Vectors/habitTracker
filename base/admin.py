@@ -1,3 +1,4 @@
+import uuid
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
@@ -11,6 +12,7 @@ class CustomUserAdmin(UserAdmin):
     
     # The fields to be used in displaying the User model
     list_display = (
+        'id',
         'email', 
         'is_staff', 
         'is_active', 

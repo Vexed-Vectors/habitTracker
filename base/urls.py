@@ -1,4 +1,6 @@
 from django.urls import path
+
+from django.contrib import admin
 from . import views
 
 urlpatterns = [
@@ -8,7 +10,6 @@ urlpatterns = [
 
     path('signup/', views.signup_page, name = 'signup_page'),
     path('signup/api/', views.signup_view, name='signup'),
-
 
 
 ]

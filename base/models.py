@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.core.validators import EmailValidator
 from django.forms import ValidationError
+from django.core.exceptions import PermissionDenied
 
 # MANAGER FOR USER
 class CustomUserManager(BaseUserManager):
@@ -48,11 +49,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     - is_staff: Determines admin access
     """
     
-    id = models.UUIDField(
-        primary_key=True, 
-        default=uuid.uuid4, 
-        editable=False
-    )
+    id = models.AutoField(primary_key=True)
     
     email = models.EmailField(
         unique=True, 
@@ -107,7 +104,25 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'User'
         verbose_name_plural = 'Users'
         ordering = ['-created_at']
+    # def has_module_perms(self, app_label):
+    #     """
+    #     Determines if the user has permissions to view the admin module
+    #     """
+    #     return self.is_staff
 
+    # def has_perm(self, perm, obj=None):
+    #     """
+    #     Explicitly check user permissions
+    #     """
+    #     return self.is_staff
+
+    # def validate_admin_access(self):
+    #     """
+    #     Explicitly validate admin access
+    #     """
+    #     if not self.is_staff:
+    #         raise PermissionDenied("You do not have permission to access the admin panel.")
+        
 class FrequencyChoices(models.TextChoices):
     DAILY = 'DAILY', 'Daily'
     WEEKLY = 'WEEKLY', 'Weekly'
